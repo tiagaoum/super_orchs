@@ -1,0 +1,487 @@
+<title>Arquitetura da Squad Autônoma</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #F3F6F6;
+    --surface: #FFFFFF;
+    --surface-2: #E9F0F0;
+    --ink: #101A1D;
+    --ink-soft: #4B5A5E;
+    --ink-faint: #7C8B8E;
+    --line: #D7E1E1;
+    --line-strong: #AEC0C0;
+    --accent: #1B6E72;
+    --accent-soft: #DEEFEF;
+    --amber: #9C6E29;
+    --green: #367051;
+    --terracotta: #A34E3D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0B1213;
+      --surface: #111C1E;
+      --surface-2: #142324;
+      --ink: #E8EFEF;
+      --ink-soft: #9FB3B5;
+      --ink-faint: #6E8688;
+      --line: #213333;
+      --line-strong: #33494A;
+      --accent: #5FC7CA;
+      --accent-soft: #113538;
+      --amber: #DDAE63;
+      --green: #74C193;
+      --terracotta: #E08872;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0B1213;
+    --surface: #111C1E;
+    --surface-2: #142324;
+    --ink: #E8EFEF;
+    --ink-soft: #9FB3B5;
+    --ink-faint: #6E8688;
+    --line: #213333;
+    --line-strong: #33494A;
+    --accent: #5FC7CA;
+    --accent-soft: #113538;
+    --amber: #DDAE63;
+    --green: #74C193;
+    --terracotta: #E08872;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .page { max-width: 1120px; margin: 0 auto; padding: 60px 26px 110px; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.09em;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  h1 {
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: clamp(30px, 4.4vw, 42px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 10px 0 14px;
+    text-wrap: balance;
+    max-width: 22ch;
+  }
+  .dek {
+    font-size: 18px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0 0 22px;
+  }
+  .meta {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+  }
+
+  main { margin-top: 56px; }
+  section + section { margin-top: 72px; }
+
+  .section-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+  .section-num {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink-faint);
+  }
+  h2 {
+    font-family: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 25px;
+    letter-spacing: -0.005em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .prose { max-width: 68ch; color: var(--ink-soft); margin: 14px 0 30px; }
+  .prose strong { color: var(--ink); font-weight: 500; }
+  .prose code {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.85em;
+    background: var(--surface-2);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  figure { margin: 0 0 18px; }
+  .diagram-frame {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+  .diagram-frame svg { display: block; width: 100%; height: auto; min-width: 640px; }
+  figcaption {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-top: 12px;
+    max-width: 74ch;
+    line-height: 1.55;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    margin: 22px 0 8px;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .swatch.dot { width: 9px; height: 9px; border-radius: 50%; }
+  .swatch.line { width: 20px; height: 0; border-top: 2px solid var(--ink-soft); border-radius: 0; }
+  .swatch.line.accent { border-top: 2.5px solid var(--accent); }
+  .swatch.line.dashed { border-top: 2px dashed var(--ink-faint); }
+
+  .notes {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    line-height: 1.9;
+  }
+  .notes b { color: var(--ink-soft); font-weight: 500; }
+
+  footer {
+    margin-top: 90px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    max-width: 74ch;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 40px 18px 80px; }
+  }
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow">SQUAD AUTÔNOMA · REGISTRO DE ARQUITETURA</p>
+    <h1>Arquitetura e fluxo do orquestrador</h1>
+    <p class="dek">Como o orquestrador conduz uma história ou bug pelas raias do xClick, delegando a agentes especializados por meio de um contrato de integração — com o humano no loop em cada gate, exceto onde a validação pode ser automática.</p>
+    <div class="meta">
+      <span>31 ago 2026</span>
+      <span>·</span>
+      <span>fonte: CONTEXT.md + ADR-0001–0004</span>
+      <span>·</span>
+      <span>piloto: 2 squads</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="arquitetura">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <h2>Arquitetura</h2>
+      </div>
+      <p class="prose">O orquestrador não roda nenhum modelo de linguagem — sua lógica é determinística: lê o <code>xClick</code>, aplica a regra do semáforo, despacha e recebe jobs. A fronteira pontilhada à direita marca onde a responsabilidade do <strong>squad_autonoma</strong> termina: a implementação de cada agente é de outro time.</p>
+
+      <figure>
+        <div class="diagram-frame">
+          <svg viewBox="0 0 1180 700" role="img" aria-label="Diagrama de arquitetura: o orquestrador na AWS lê e grava o xClick via MCP, publica jobs em SNS/SQS filtrados por raia, e a fronteira pontilhada mostra os agentes especializados — de times externos — consumindo essas filas e alguns deles acessando o ServiceNow.">
+            <defs>
+              <marker id="arrow1" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-faint)"></path>
+              </marker>
+            </defs>
+
+            <!-- external: xClick -->
+            <rect x="40" y="24" width="190" height="58" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="135" y="49" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:14px;fill:var(--ink)">xClick</text>
+            <text x="135" y="65" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">board por squad</text>
+
+            <!-- external: ServiceNow -->
+            <rect x="950" y="24" width="190" height="58" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4" stroke-dasharray="4 3"></rect>
+            <text x="1045" y="49" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:14px;fill:var(--ink)">ServiceNow</text>
+            <text x="1045" y="65" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">DEV · QA · PROD</text>
+
+            <!-- AWS boundary -->
+            <rect x="28" y="110" width="680" height="540" rx="16" style="fill:var(--accent-soft);stroke:var(--accent)" stroke-width="1.3" stroke-dasharray="2 5" fill-opacity="0.5"></rect>
+            <text x="50" y="134" style="font-family:'IBM Plex Mono';font-size:11px;letter-spacing:0.04em;fill:var(--accent);font-weight:500">AWS · squad_autonoma (escopo do projeto)</text>
+
+            <!-- agents boundary -->
+            <rect x="730" y="280" width="410" height="340" rx="16" style="fill:none;stroke:var(--line-strong)" stroke-width="1.3" stroke-dasharray="2 5"></rect>
+            <text x="750" y="304" style="font-family:'IBM Plex Mono';font-size:11px;letter-spacing:0.04em;fill:var(--ink-faint);font-weight:500">times externos · fora do escopo (ADR-0002)</text>
+
+            <!-- EventBridge -->
+            <rect x="140" y="150" width="190" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="235" y="171" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;fill:var(--ink)">EventBridge Scheduler</text>
+            <text x="235" y="185" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">cron por squad</text>
+
+            <!-- Backlog Watcher -->
+            <rect x="140" y="230" width="190" height="60" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="235" y="255" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;fill:var(--ink)">Backlog Watcher</text>
+            <text x="235" y="269" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">Lambda · checa dependência + WIP</text>
+
+            <!-- Config DynamoDB -->
+            <rect x="360" y="230" width="160" height="60" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="440" y="255" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;fill:var(--ink)">Config</text>
+            <text x="440" y="269" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">DynamoDB · squads/boards/WIP</text>
+
+            <!-- Step Functions hero -->
+            <rect x="140" y="320" width="380" height="100" rx="10" style="fill:var(--surface);stroke:var(--accent)" stroke-width="2.4"></rect>
+            <text x="330" y="356" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:700;font-size:15px;fill:var(--ink)">Step Functions (Standard)</text>
+            <text x="330" y="376" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:10px;fill:var(--ink-soft)">1 execução por item</text>
+            <text x="330" y="391" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:10px;fill:var(--ink-soft)">lock + auditoria nativos (ADR-0004)</text>
+            <text x="330" y="406" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:10px;fill:var(--ink-soft)">timeout por raia</text>
+
+            <!-- SNS in -->
+            <rect x="140" y="450" width="190" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="235" y="471" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;fill:var(--ink)">SNS · jobs-entrada</text>
+            <text x="235" y="485" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">1 tópico, 1 publicação</text>
+
+            <!-- SQS filas group -->
+            <rect x="360" y="440" width="340" height="90" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="380" y="458" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">filas de entrada · SQS (filtro por <tspan style="fill:var(--ink)">raia</tspan>)</text>
+            <g style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink)">
+              <rect x="380" y="468" width="54" height="22" rx="5" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1"></rect>
+              <text x="407" y="482" text-anchor="middle">REFIN</text>
+              <rect x="444" y="468" width="54" height="22" rx="5" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1"></rect>
+              <text x="471" y="482" text-anchor="middle">EXEC</text>
+              <rect x="508" y="468" width="54" height="22" rx="5" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1"></rect>
+              <text x="535" y="482" text-anchor="middle">PROMO</text>
+              <rect x="572" y="468" width="54" height="22" rx="5" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1"></rect>
+              <text x="599" y="482" text-anchor="middle">QAI</text>
+              <rect x="636" y="468" width="54" height="22" rx="5" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1"></rect>
+              <text x="663" y="482" text-anchor="middle">GMUD</text>
+            </g>
+
+            <!-- SQS out -->
+            <rect x="140" y="560" width="380" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="330" y="581" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:12.5px;fill:var(--ink)">SQS · jobs-saida (compartilhada)</text>
+            <text x="330" y="595" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">job_id · status · conteúdo · subbugs</text>
+
+            <!-- Agents -->
+            <rect x="752" y="320" width="170" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="837" y="341" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:11.5px;fill:var(--ink)">Refinamento</text>
+            <text x="837" y="355" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">time responsável</text>
+
+            <rect x="752" y="390" width="170" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="837" y="411" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:11.5px;fill:var(--ink)">Execução</text>
+            <text x="837" y="425" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">dev em ServiceNow DEV</text>
+
+            <rect x="752" y="460" width="170" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="837" y="481" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:11.5px;fill:var(--ink)">Pronto p/ QA</text>
+            <text x="837" y="495" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">promoção DEV → QA</text>
+
+            <rect x="942" y="320" width="170" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="1027" y="341" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:11.5px;fill:var(--ink)">QAI</text>
+            <text x="1027" y="355" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">testes em ServiceNow QA</text>
+
+            <rect x="942" y="390" width="170" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
+            <text x="1027" y="411" text-anchor="middle" style="font-family:'IBM Plex Sans';font-weight:600;font-size:11.5px;fill:var(--ink)">GMUD</text>
+            <text x="1027" y="425" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">preenche GMUD</text>
+
+            <!-- connectors -->
+            <path d="M90,82 L90,370" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-start="url(#arrow1)"></path>
+            <path d="M90,260 L140,260" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <path d="M90,370 L140,370" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="60" y="230" text-anchor="middle" transform="rotate(-90 60 230)" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">MCP · lê / grava xClick</text>
+
+            <path d="M235,200 L235,230" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="245" y="219" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">dispara ciclo</text>
+
+            <path d="M330,260 L360,260" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="332" y="252" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">config</text>
+
+            <path d="M235,290 L235,320" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="245" y="309" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">inicia execução</text>
+
+            <path d="M235,420 L235,450" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="245" y="440" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">publica job</text>
+
+            <path d="M140,585 L110,585 L110,370 L140,370" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="90" y="480" text-anchor="middle" transform="rotate(-90 90 480)" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">aguarda resultado</text>
+
+            <path d="M330,475 L360,475" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="336" y="467" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">fan-out</text>
+
+            <path d="M700,483 L730,455" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="705" y="446" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">consome</text>
+
+            <path d="M752,555 L620,555 L620,585 L520,585" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow1)"></path>
+            <text x="615" y="547" text-anchor="end" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-soft)">publica resultado</text>
+
+            <path d="M1030,280 L1030,82" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrow1)"></path>
+            <text x="855" y="150" text-anchor="end" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">Execução · Pronto p/QA · GMUD</text>
+            <text x="855" y="166" text-anchor="end" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">acessam ServiceNow direto</text>
+          </svg>
+        </div>
+        <figcaption>O orquestrador (AWS) fala com o xClick só por MCP e despacha jobs por fila; a implementação de cada agente e o acesso ao ServiceNow ficam fora do escopo do projeto (ADR-0002).</figcaption>
+      </figure>
+
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--accent-soft);border:1px solid var(--accent)"></span>escopo do squad_autonoma</span>
+        <span><span class="swatch" style="background:transparent;border:1px dashed var(--line-strong)"></span>fora do escopo (times de agente)</span>
+        <span><span class="swatch line dashed"></span>integração fora do fluxo principal (ServiceNow)</span>
+        <span>REFIN=Refinamento · EXEC=Execução · PROMO=promoção p/ QA · QAI=Em Testes QA · GMUD=Em Implantação</span>
+      </div>
+
+      <div class="notes">
+        <div><b>ADR-0001</b> — orquestrador centraliza todo acesso ao xClick.</div>
+        <div><b>ADR-0002</b> — escopo do projeto para no orquestrador + contrato; agentes são de outros times.</div>
+        <div><b>ADR-0003</b> — integração assíncrona: SNS de entrada com filtro por raia, SQS de saída compartilhada.</div>
+        <div><b>ADR-0004</b> — núcleo é uma execução do Step Functions por item.</div>
+      </div>
+    </section>
+
+    <section id="fluxo">
+      <div class="section-head">
+        <span class="section-num">02</span>
+        <h2>Fluxo</h2>
+      </div>
+      <p class="prose">Cada item ganha sua própria execução do Step Functions ao sair do Backlog. Ela percorre as raias em sequência, aguardando o agente responsável e, na maioria dos casos, a validação humana do subitem — a única exceção automática é <strong>Pronto para QA</strong>. Subbugs abertos em <strong>Testado QA</strong> reabrem o ciclo a partir de <strong>Em Refinamento</strong>.</p>
+
+      <figure>
+        <div class="diagram-frame">
+          <svg viewBox="0 0 820 1060" role="img" aria-label="Diagrama de fluxo: um item sai do Backlog após checar dependência e WIP, percorre Em Refinamento, Execução, Peer Review, Pronto para QA, Em Testes QA e Testado QA, com gate humano na maioria das raias e gate automático em Pronto para QA; subbugs abertos em Testado QA reabrem o ciclo em Em Refinamento; a raia final, Em Implantação, é seguida por implantação e ativação manuais fora do orquestrador.">
+            <defs>
+              <marker id="arrow2" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-faint)"></path>
+              </marker>
+              <marker id="arrowAccent" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" style="fill:var(--accent)"></path>
+              </marker>
+            </defs>
+
+            <!-- subbug loop-back (drawn first, behind nodes) -->
+            <path d="M230,762 C 90,762 90,262 230,262" style="stroke:var(--accent);fill:none" stroke-width="2.6" marker-end="url(#arrowAccent)"></path>
+            <text x="90" y="512" text-anchor="middle" transform="rotate(-90 90 512)" style="font-family:'IBM Plex Mono';font-size:10.5px;font-weight:500;fill:var(--accent)">subbug pendente</text>
+
+            <!-- não loop -->
+            <path d="M305,155 C 150,155 150,60 230,60" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+            <text x="150" y="100" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">não</text>
+            <text x="150" y="113" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">aguarda ciclo</text>
+
+            <!-- Backlog -->
+            <rect x="230" y="30" width="300" height="60" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="55" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Backlog</text>
+            <text x="250" y="73" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">escolhe item de maior prioridade</text>
+
+            <!-- decision diamond -->
+            <path d="M380,118 L458,155 L380,192 L302,155 Z" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></path>
+            <text x="380" y="149" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink)">dependência</text>
+            <text x="380" y="161" text-anchor="middle" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink)">resolvida + WIP livre?</text>
+
+            <path d="M230,155 L302,155" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+            <path d="M380,192 L380,230" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+            <text x="392" y="216" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">sim</text>
+
+            <!-- Em Refinamento -->
+            <rect x="230" y="230" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="257" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Em Refinamento</text>
+            <text x="250" y="276" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente: Refinamento</text>
+            <circle cx="558" cy="262" r="4" style="fill:var(--amber)"></circle>
+            <text x="570" y="266" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">gate · humano</text>
+
+            <path d="M380,294 L380,330" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+
+            <!-- Execução -->
+            <rect x="230" y="330" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="357" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Execução</text>
+            <text x="250" y="376" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente: Execução (ServiceNow DEV)</text>
+            <circle cx="558" cy="362" r="4" style="fill:var(--ink-faint)"></circle>
+            <text x="570" y="366" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">→ gate em Peer Review</text>
+
+            <path d="M380,394 L380,430" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+
+            <!-- Peer Review -->
+            <rect x="230" y="430" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="457" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Peer Review</text>
+            <text x="250" y="476" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">revisão humana do update set/fix script</text>
+            <circle cx="558" cy="462" r="4" style="fill:var(--amber)"></circle>
+            <text x="570" y="466" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">gate · humano</text>
+
+            <path d="M380,494 L380,530" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+
+            <!-- Pronto para QA -->
+            <rect x="230" y="530" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="557" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Pronto para QA</text>
+            <text x="250" y="576" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente: promoção DEV → QA</text>
+            <circle cx="558" cy="562" r="4" style="fill:var(--green)"></circle>
+            <text x="570" y="566" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">gate · automático</text>
+
+            <path d="M380,594 L380,630" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+
+            <!-- Em Testes QA -->
+            <rect x="230" y="630" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="657" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Em Testes QA</text>
+            <text x="250" y="676" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente: QAI (ServiceNow QA)</text>
+            <circle cx="558" cy="662" r="4" style="fill:var(--ink-faint)"></circle>
+            <text x="570" y="666" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">→ gate em Testado QA</text>
+
+            <path d="M380,694 L380,730" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+
+            <!-- Testado QA -->
+            <rect x="230" y="730" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="757" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Testado QA</text>
+            <text x="250" y="776" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">resultado QA + subbugs, se houver</text>
+            <circle cx="558" cy="762" r="4" style="fill:var(--amber)"></circle>
+            <text x="570" y="766" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">gate · humano</text>
+
+            <path d="M380,794 L380,830" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
+            <text x="392" y="816" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">sem subbugs abertos</text>
+
+            <!-- Em Implantação -->
+            <rect x="230" y="830" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="250" y="857" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Em Implantação</text>
+            <text x="250" y="876" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente: GMUD (update set/fix script)</text>
+            <circle cx="558" cy="862" r="4" style="fill:var(--amber)"></circle>
+            <text x="570" y="866" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">gate · humano</text>
+
+            <path d="M380,894 L380,930" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrow2)"></path>
+            <text x="392" y="916" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">manual</text>
+
+            <!-- terminal -->
+            <rect x="230" y="930" width="300" height="64" rx="9" style="fill:none;stroke:var(--line-strong)" stroke-width="1.4" stroke-dasharray="4 3"></rect>
+            <text x="250" y="957" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink-soft)">Implementado → Ativado</text>
+            <text x="250" y="976" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-faint)">implantação e ativação manuais</text>
+            <circle cx="558" cy="962" r="4" style="fill:var(--ink-faint)"></circle>
+            <text x="570" y="966" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-faint)">fora do orquestrador</text>
+          </svg>
+        </div>
+        <figcaption>Um item avança raia a raia enquanto o semáforo do subitem permanece satisfeito; subbugs abertos em Testado QA reabrem o ciclo a partir de Em Refinamento.</figcaption>
+      </figure>
+
+      <div class="legend">
+        <span><span class="swatch dot" style="background:var(--amber)"></span>gate humano</span>
+        <span><span class="swatch dot" style="background:var(--green)"></span>gate automático</span>
+        <span><span class="swatch line accent"></span>reentrada por subbug</span>
+        <span><span class="swatch line dashed"></span>fora do orquestrador (manual)</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Arquivos-fonte: <code style="font-family:inherit">CONTEXT.md</code> · <code style="font-family:inherit">docs/adr/0001–0004</code>.<br>
+    Em aberto para a próxima sessão: autenticação do MCP do xClick, desenho do control plane, e o detalhe fino de reavaliação de dependências entre itens.
+  </footer>
+</div>
