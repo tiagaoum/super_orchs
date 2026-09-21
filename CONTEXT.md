@@ -8,7 +8,7 @@ Orquestração de agentes de IA especializados que conduzem o ciclo de vida de d
 Board ágil interno da empresa (tipo Jira simplificado) usado para gerenciar o SDLC. Expõe API e um servidor MCP para consulta e movimentação de itens.
 
 **Raia**:
-Uma coluna/status de um item dentro do xClick, representando um estágio do SDLC. Sequência fixa: Backlog → Em Refinamento → Refinado → Execução → Peer Review → Pronto para QA → Em Testes QA → Testado QA → Em Implantação → Implementado → Ativado.
+Uma coluna/status de um item dentro do xClick, representando um estágio do SDLC. Sequência fixa: Backlog → Em Refinamento → Refinado → Execução → Peer Review → Pronto para QA → Em Testes QA → Testado QA → Em Implantação → Implantado → Ativado.
 _Avoid_: Status, coluna, etapa (usar "raia" para manter consistência com o vocabulário do usuário)
 
 **Item**:
@@ -42,7 +42,7 @@ Seção dedicada dentro de um item do xClick que contém o conteúdo destinado a
 Agente especializado responsável pelos testes automatizados/assistidos por IA na raia "Em Testes QA".
 
 **GMUD** (Gestão de Mudança):
-Documento de change management necessário para autorizar a implantação de update sets/fix scripts em produção. Preenchido pelo agente da raia "Em Implantação". A execução da implantação em si é sempre humana: a pessoa implanta em produção e encerra o subitem da raia, e só então o orquestrador move o item para "Implementado" (ver ADR-0008).
+Documento de change management necessário para autorizar a implantação de update sets/fix scripts em produção. Preenchido pelo agente da raia "Em Implantação". A execução da implantação em si é sempre humana: a pessoa implanta em produção e encerra o subitem da raia, e só então o orquestrador move o item para "Implantado" (ver ADR-0008).
 
 **Update Set**:
 Artefato do ServiceNow que empacota mudanças de configuração/código. Criado e aplicado pelo agente de Execução diretamente no ambiente DEV do ServiceNow, e depois promovido para QA; a promoção final para produção é sempre manual.
