@@ -32,7 +32,7 @@ Regra de governança que decide se um item pode avançar de raia: ao entrar na r
 _Avoid_: Flag, gate (usar "semáforo" — termo do usuário)
 
 **Raia de revisão humana**:
-Raia em que o semáforo só é liberado por uma pessoa. São três: **Refinado** (o refinamento entregue pelo agente é ajustado e concluído por um humano antes da Execução, resolvendo as dúvidas que o agente apontou), **Peer Review** (revisão do que o agente implementou no ambiente DEV, com ajuste manual do que ficou incorreto ou faltando) e **Testado QA** (revisão dos testes do agente e ajuste/encerramento dos subbugs pelo QA).
+Raia em que o semáforo só é liberado por uma pessoa. São quatro: **Refinado** (o refinamento entregue pelo agente é ajustado e concluído por um humano antes da Execução, resolvendo as dúvidas que o agente apontou), **Peer Review** (revisão do que o agente implementou no ambiente DEV, com ajuste manual do que ficou incorreto ou faltando), **Testado QA** (revisão dos testes do agente e ajuste/encerramento dos subbugs pelo QA) e **Em Implantação** (o agente monta a GMUD, mas quem implanta em produção e encerra o subitem é uma pessoa — ver ADR-0008).
 _Avoid_: Gate manual, aprovação (usar "raia de revisão humana")
 
 **"Para IA Ler"**:
@@ -42,7 +42,7 @@ Seção dedicada dentro de um item do xClick que contém o conteúdo destinado a
 Agente especializado responsável pelos testes automatizados/assistidos por IA na raia "Em Testes QA".
 
 **GMUD** (Gestão de Mudança):
-Documento de change management necessário para autorizar a implantação de update sets/fix scripts em produção. Preenchido pelo agente da raia "Em Implantação". A execução da implantação em si é sempre humana e acontece fora do orquestrador.
+Documento de change management necessário para autorizar a implantação de update sets/fix scripts em produção. Preenchido pelo agente da raia "Em Implantação". A execução da implantação em si é sempre humana: a pessoa implanta em produção e encerra o subitem da raia, e só então o orquestrador move o item para "Implementado" (ver ADR-0008).
 
 **Update Set**:
 Artefato do ServiceNow que empacota mudanças de configuração/código. Criado e aplicado pelo agente de Execução diretamente no ambiente DEV do ServiceNow, e depois promovido para QA; a promoção final para produção é sempre manual.

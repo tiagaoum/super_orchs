@@ -190,7 +190,7 @@
     <div class="meta">
       <span>20 set 2026</span>
       <span>·</span>
-      <span>fonte: CONTEXT.md + ADR-0001–0007</span>
+      <span>fonte: CONTEXT.md + ADR-0001–0008</span>
       <span>·</span>
       <span>piloto: 2 squads</span>
       <span>·</span>
@@ -276,7 +276,7 @@
               <rect x="636" y="468" width="54" height="22" rx="5" style="fill:var(--surface-2);stroke:var(--line)" stroke-width="1"></rect>
               <text x="663" y="482" text-anchor="middle">GMUD</text>
             </g>
-            <text x="380" y="512" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-faint)">Refinado e Peer Review não têm fila: são raias de revisão humana</text>
+            <text x="380" y="512" style="font-family:'IBM Plex Mono';font-size:8.6px;fill:var(--ink-faint)">Refinado e Peer Review não têm fila: são as raias sem agente</text>
 
             <!-- SQS out -->
             <rect x="140" y="560" width="380" height="50" rx="8" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.3"></rect>
@@ -357,6 +357,7 @@
         <div><b>ADR-0005</b> — subitem aberto em cada raia é o semáforo de avanço.</div>
         <div><b>ADR-0006</b> — raia "Refinado" separa o refinamento do agente do aceite humano.</div>
         <div><b>ADR-0007</b> — v1 é linear: nenhum item volta para uma raia anterior.</div>
+        <div><b>ADR-0008</b> — "Em Implantação" tem agente (GMUD), mas o avanço é liberado por uma pessoa.</div>
       </div>
     </section>
 
@@ -365,11 +366,11 @@
         <span class="section-num">02</span>
         <h2>Fluxo</h2>
       </div>
-      <p class="prose">Cada item ganha sua própria execução do Step Functions ao sair do Backlog. Em cada raia o orquestrador abre um subitem e só avança quando ele é encerrado — esse é o semáforo. Em três raias quem encerra é uma pessoa: <strong>Refinado</strong>, <strong>Peer Review</strong> e <strong>Testado QA</strong>. Nas demais, o próprio agente encerra ao terminar com sucesso. Na v1 o avanço é estritamente linear: subbug aberto pelo QAI segura o item em Testado QA até o QA encerrá-lo, mas <strong>não devolve o item para uma raia anterior</strong>.</p>
+      <p class="prose">Cada item ganha sua própria execução do Step Functions ao sair do Backlog. Em cada raia o orquestrador abre um subitem e só avança quando ele é encerrado — esse é o semáforo. Em quatro raias quem encerra é uma pessoa: <strong>Refinado</strong>, <strong>Peer Review</strong>, <strong>Testado QA</strong> e <strong>Em Implantação</strong> — nessa última o agente monta a GMUD, mas implantar em produção e encerrar o subitem é ato humano. Nas demais, o próprio agente encerra ao terminar com sucesso. Na v1 o avanço é estritamente linear: subbug aberto pelo QAI segura o item em Testado QA até o QA encerrá-lo, mas <strong>não devolve o item para uma raia anterior</strong>.</p>
 
       <figure>
         <div class="diagram-frame">
-          <svg viewBox="0 0 660 1120" role="img" aria-label="Diagrama de fluxo: um item sai do Backlog após checar dependência e WIP e percorre, sempre para frente, as raias Em Refinamento, Refinado, Execução, Peer Review, Pronto para QA, Em Testes QA, Testado QA e Em Implantação. Cada raia abre um subitem que funciona como semáforo; em Refinado, Peer Review e Testado QA quem encerra o subitem é uma pessoa, nas demais é o próprio agente. As raias finais, Implementado e Ativado, são manuais e ficam fora do orquestrador.">
+          <svg viewBox="0 0 660 1220" role="img" aria-label="Diagrama de fluxo: um item sai do Backlog após checar dependência e WIP e percorre, sempre para frente, as raias Em Refinamento, Refinado, Execução, Peer Review, Pronto para QA, Em Testes QA, Testado QA e Em Implantação. Cada raia abre um subitem que funciona como semáforo; em Refinado, Peer Review, Testado QA e Em Implantação quem encerra o subitem é uma pessoa, nas demais é o próprio agente. Implementado é a última movimentação do orquestrador; a ativação é manual e fica fora dele.">
             <defs>
               <marker id="arrow2" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
                 <path d="M0,0 L10,5 L0,10 z" style="fill:var(--ink-faint)"></path>
@@ -460,24 +461,33 @@
             <path d="M320,894 L320,930" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
 
             <!-- Em Implantação -->
-            <rect x="170" y="930" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <rect x="170" y="930" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--amber)" stroke-width="1.8"></rect>
             <text x="190" y="957" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Em Implantação</text>
-            <text x="190" y="976" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente: GMUD (update set/fix script)</text>
-            <circle cx="498" cy="962" r="4" style="fill:var(--green)"></circle>
-            <text x="510" y="966" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">subitem · agente encerra</text>
+            <text x="190" y="976" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">agente monta a GMUD · humano implanta em PROD</text>
+            <circle cx="498" cy="962" r="4" style="fill:var(--amber)"></circle>
+            <text x="510" y="966" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">subitem · humano encerra</text>
 
-            <path d="M320,994 L320,1030" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrow2)"></path>
-            <text x="332" y="1016" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">manual</text>
+            <path d="M320,994 L320,1030" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" marker-end="url(#arrow2)"></path>
 
-            <!-- terminal -->
-            <rect x="170" y="1030" width="300" height="64" rx="9" style="fill:none;stroke:var(--line-strong)" stroke-width="1.4" stroke-dasharray="4 3"></rect>
-            <text x="190" y="1057" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink-soft)">Implementado → Ativado</text>
-            <text x="190" y="1076" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-faint)">implantação e ativação manuais</text>
+            <!-- Implementado -->
+            <rect x="170" y="1030" width="300" height="64" rx="9" style="fill:var(--surface);stroke:var(--line-strong)" stroke-width="1.4"></rect>
+            <text x="190" y="1057" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink)">Implementado</text>
+            <text x="190" y="1076" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">última movimentação do orquestrador</text>
             <circle cx="498" cy="1062" r="4" style="fill:var(--ink-faint)"></circle>
-            <text x="510" y="1066" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-faint)">fora do orquestrador</text>
+            <text x="510" y="1066" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-soft)">execução encerra aqui</text>
+
+            <path d="M320,1094 L320,1130" style="stroke:var(--ink-faint);fill:none" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#arrow2)"></path>
+            <text x="332" y="1116" style="font-family:'IBM Plex Mono';font-size:9px;fill:var(--ink-soft)">manual</text>
+
+            <!-- Ativado -->
+            <rect x="170" y="1130" width="300" height="64" rx="9" style="fill:none;stroke:var(--line-strong)" stroke-width="1.4" stroke-dasharray="4 3"></rect>
+            <text x="190" y="1157" style="font-family:'IBM Plex Sans';font-weight:600;font-size:15px;fill:var(--ink-soft)">Ativado</text>
+            <text x="190" y="1176" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-faint)">ativação manual</text>
+            <circle cx="498" cy="1162" r="4" style="fill:var(--ink-faint)"></circle>
+            <text x="510" y="1166" style="font-family:'IBM Plex Mono';font-size:9.5px;fill:var(--ink-faint)">fora do orquestrador</text>
           </svg>
         </div>
-        <figcaption>Um item avança raia a raia enquanto o subitem daquela raia for encerrado. Nas três raias destacadas em âmbar, quem encerra é uma pessoa; nas demais, o agente. Na v1 não existe retorno de raia (ADR-0007).</figcaption>
+        <figcaption>Um item avança raia a raia enquanto o subitem daquela raia for encerrado. Nas quatro raias destacadas em âmbar, quem encerra é uma pessoa; nas demais, o agente. Na v1 não existe retorno de raia (ADR-0007).</figcaption>
       </figure>
 
       <div class="legend">
@@ -489,7 +499,7 @@
   </main>
 
   <footer>
-    Arquivos-fonte: <code style="font-family:inherit">CONTEXT.md</code> · <code style="font-family:inherit">docs/adr/0001–0007</code>.<br>
+    Arquivos-fonte: <code style="font-family:inherit">CONTEXT.md</code> · <code style="font-family:inherit">docs/adr/0001–0008</code>.<br>
     Em aberto para a próxima sessão: autenticação do MCP do xClick, desenho do control plane, o detalhe fino de reavaliação de dependências entre itens, e quando (e se) reintroduzir retorno de raia — deliberadamente fora da v1 (ADR-0007).
   </footer>
 </div>
